@@ -1,0 +1,120 @@
+--declare @Z int = 3;
+--declare @name nvarchar (MAX)
+--declare @category nvarchar (MAX) = '?????????' 
+--select Book.BookName, Category.CategotyName from Book,Category where Book.CategoryId= Category.Id and Category.CategotyName=@category
+--print ('test = '@category+ convert(nvarchar(MAX),@Id))
+--_______________________________________________________
+
+--select Book.BookName,Author.AuthorName,Country.CountryName, 'Price' = 
+--case
+--when Book.Price<5 then 'SO chip'
+--when Book.Price>200 and Book.Price <300 then 'Expencive'
+--when Book.Price> 300 then 'Midle'
+--else 'Chep'
+--from Book Left outer join Author on Book.AuthorId=Author.Id
+--left outer join Address on address.Id = Author.AddressId
+--left outer join Country on Country.Id = Address.CountryId
+
+select * from Book order by Price
+declare @i int =0;
+declare @name nvarchar (MAX)='';
+while (@i<>5)
+begin
+offset @i rows 
+fetch next 1 rows onlu
+select @name =Book.BookName from Book where update Price +  ;
+Print (@name)
+set @i+=1;
+end  
+
+
+--lkjbnk
+--hoho
+go
+
+select * from Book Order By Price
+select Id from Book Order By Price offset 0 rows fetch next 1 rows only
+select Id from Book Order By Price offset 1 rows fetch next 1 rows only
+select Id from Book Order By Price offset 2 rows fetch next 1 rows only
+select Id from Book Order By Price offset 3 rows fetch next 1 rows only
+select Id from Book Order By Price offset 4 rows fetch next 1 rows only
+
+declare @i int =0, @Id int;
+while (@i<>5)
+begin
+select @Id = Id from Book Order By Price offset @i rows fetch next 1 rows only
+select * from Book where id = @Id
+update Book Set Price*1.03 where Id = @Id
+select * from Book where id = @Id
+set @i+=1;
+end  
+go
+
+------------PROCEDURES--------------
+
+create Procedure GetBookAutorAddress as
+select Book .BookName ,  Author.AuthorName, Address.City+ ' ' +Address.Street + Country.CountryName
+from Book JOIN Author ON Book.AuthorId=AuthorId
+JoIN Address ON Author.AddressId=Address.Id
+JOIN Country ON Address .CountryId=Country.Id
+
+exec GetBookAutorAddress
+go
+
+create Procedure GetBookById (@Id INT) as
+select Book.BookName,Book.Description,Book.Price,Book.PublishDate,Book.NumberPages
+from Book JOIN Author ON Book.AuthorId =Author.Id where Author.Id =@Id
+exec GetBookById 1
+go
+
+create Procedure GetBookByAuthor (@Category nvarchar (max)) as
+select * from Book where Book.CategoryId=
+(select Id  from Category where Category.CategotyName=@Category) 
+
+exec GetBookByAuthor 'Histori'
+go
+
+create procedure UpdataSalesSetNewPriceForTop (@Price money =100)
+as
+declare @Id int 
+select TOP(1) @Id = Id rom Book order by PublishDate
+update Book Set Price =@Price where Id =@Id 
+
+exec UpdataSalesSetNewPriceForTop 13.13
+go
+
+create procedure UpdateData (@NewDate DateTime = '2019.06.15', @Id Int =1)
+as
+update Book Set PublishDate =@NewDate where Id=@Id
+
+exec UpdateData  '2019.04.13',8
+go
+
+----------------OUTPUT------------------
+
+create Procedure InsertIntoBook (@name nvarchar(MAX),@categoryName nvarchar(MAX),@author nvarchar(MAx),
+@price money, @page int=0, @succesMsg nvarchar(MAX) output , @amountRows int  output)
+as
+declare @authorId int ,@@categoryId int;
+select @authorId = Id from Author where AuthorName=@author;
+if (@authorId = 0) set @succesMsg = 'No such author'
+else 
+begin 
+	select @categoryId = Id from Category where @categoryName=@categoryName;
+	if (@categoryId = 0) set @succesMsg = 'No such Category'
+	else 
+	begin 
+	INSERT Book Values (@name , 'no',@page,@price,GETDATE(),@authorId,@@categoryId);
+	set @amountRows =1;
+	set @succesMsg = 'Inserted'
+	end
+end 
+
+go
+declare @msg nvarchar (MAX),@num int 
+exec  InsertIntoBook 'New Book 111', 'Histori','Ivanov',200.5,133,@msg output , @num output
+exec  InsertIntoBook 'New Book 111', 'Histori','Ivanov',200.5,133,@msg output , @num output
+
+print @msg
+
+sreate procedure Test1 
